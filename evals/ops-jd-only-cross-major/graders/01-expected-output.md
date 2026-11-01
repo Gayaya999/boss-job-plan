@@ -1,0 +1,7 @@
+---
+type: llm
+focus: trace
+weight: 1
+---
+
+The result matches this description: 在没有简历材料的情况下完成岗位侧分析与简历框架，经历处用占位符与具体追问，不给匹配分数；读取跨专业与市场营销相关指引；指出 KPI 考核等待核实项；给出学习计划、打招呼话术与跨专业解释话术。

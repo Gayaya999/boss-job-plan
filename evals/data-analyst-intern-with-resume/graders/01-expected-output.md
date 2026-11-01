@@ -1,0 +1,7 @@
+---
+type: llm
+focus: trace
+weight: 1
+---
+
+The result matches this description: 生成完整求职方案 Markdown 文件：JD 四类拆解、证据匹配表（SQL 判为部分证明/技能缺口）、简历文案草稿（课程项目标注为课程项目、无编造实习或数字）、BOSS 打招呼话术、SQL 等知识地图与练习任务、按 10 天排的日程、自我介绍和标注为基于JD推演的面试题。

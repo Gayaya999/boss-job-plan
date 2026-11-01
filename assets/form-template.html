@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>求职问卷</title>
+<style>
+  :root {
+    --bg1: #eef6f4; --bg2: #f6f3ee; --card: #ffffff; --text: #1d2129; --sub: #6b7280; --line: #e5e7eb;
+    --brand: #0f9d8a; --brand-2: #0b7f70; --brand-soft: #e6f6f3; --warn: #b45309; --warn-soft: #fef3e2; --rec: #e5484d;
+    --shadow: 0 10px 40px rgba(16, 24, 40, .08), 0 2px 8px rgba(16, 24, 40, .04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg1: #0f1615; --bg2: #15130f; --card: #1b1e21; --text: #e8eaed; --sub: #9aa0a6; --line: #2e3236;
+      --brand: #2cc4ad; --brand-2: #22a693; --brand-soft: #173431; --warn: #f0b45a; --warn-soft: #3a2e1a; --rec: #ff6369;
+      --shadow: 0 10px 40px rgba(0, 0, 0, .4);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; color: var(--text); background: linear-gradient(135deg, var(--bg1), var(--bg2)) fixed;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .app { max-width: 680px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; padding: 20px 16px 16px; }
+
+  .top .title { font-size: 15px; font-weight: 600; }
+  .top .meta { font-size: 12px; color: var(--sub); margin-top: 2px; }
+  .top .meta a { color: var(--brand); text-decoration: none; }
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .progress { flex: 1; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 0; background: var(--brand); border-radius: 3px; transition: width .35s ease; }
+  .step-text { font-size: 12px; color: var(--sub); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .stage { flex: 1; display: flex; align-items: center; padding: 22px 0; }
+  .card { width: 100%; background: var(--card); border-radius: 22px; box-shadow: var(--shadow); padding: 28px 26px 24px; }
+  .card.in-right { animation: inRight .32s ease both; }
+  .card.in-left { animation: inLeft .32s ease both; }
+  @keyframes inRight { from { opacity: 0; transform: translateX(36px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes inLeft { from { opacity: 0; transform: translateX(-36px) scale(.98); } to { opacity: 1; transform: none; } }
+
+  .section-tag { display: inline-block; font-size: 12px; color: var(--brand); background: var(--brand-soft); border-radius: 999px; padding: 2px 10px; margin-bottom: 12px; }
+  .qno { font-size: 13px; color: var(--sub); margin-bottom: 4px; }
+  .label { font-size: 21px; font-weight: 650; line-height: 1.45; margin: 0 0 6px; }
+  .label .opt { font-size: 12px; font-weight: 400; color: var(--sub); margin-left: 8px; vertical-align: middle; }
+  .hint { font-size: 14px; color: var(--sub); margin-bottom: 6px; }
+  .why { display: inline-block; font-size: 12px; color: var(--warn); background: var(--warn-soft); border-radius: 6px; padding: 2px 9px; margin: 2px 0 16px; }
+
+  .chips { display: flex; flex-direction: column; gap: 9px; }
+  .chip { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 1.5px solid var(--line); background: transparent;
+    color: var(--text); border-radius: 14px; padding: 11px 14px; cursor: pointer; font: inherit; font-size: 15px; transition: all .15s; }
+  .chip:hover { border-color: var(--brand); background: var(--brand-soft); }
+  .chip .key { flex: none; width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--line); font-size: 12px; color: var(--sub);
+    display: flex; align-items: center; justify-content: center; }
+  .chip .mark { margin-left: auto; opacity: 0; font-size: 14px; }
+  .chip.on { border-color: var(--brand); background: var(--brand-soft); font-weight: 600; }
+  .chip.on .key { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .chip.on .mark { opacity: 1; color: var(--brand); }
+  .multi-tip { font-size: 12px; color: var(--sub); margin: -8px 0 10px; }
+
+  .field { position: relative; margin-top: 12px; }
+  textarea, input[type=text] { width: 100%; border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 14px; background: transparent;
+    color: var(--text); font: inherit; font-size: 15px; resize: vertical; transition: border-color .15s; }
+  textarea:focus, input[type=text]:focus { outline: none; border-color: var(--brand); }
+  .quick { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill { border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: 999px; padding: 3px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .pill:hover { border-color: var(--brand); color: var(--brand); }
+
+  .voice-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .mic { display: inline-flex; align-items: center; gap: 8px; border: none; border-radius: 999px; padding: 9px 16px 9px 12px; cursor: pointer;
+    background: var(--brand-soft); color: var(--brand-2); font: inherit; font-size: 14px; font-weight: 600; transition: all .15s; }
+  .mic:hover { filter: brightness(.97); }
+  .mic svg { width: 18px; height: 18px; }
+  .mic.rec { background: var(--rec); color: #fff; animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(229, 72, 77, .45); } 70% { box-shadow: 0 0 0 12px rgba(229, 72, 77, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 72, 77, 0); } }
+  .interim { font-size: 13px; color: var(--sub); flex: 1; min-height: 1em; }
+  .sub-label { font-size: 13px; color: var(--sub); margin: 16px 0 0; }
+
+  .nav { display: flex; gap: 10px; align-items: center; }
+  .btn { border: none; border-radius: 12px; padding: 12px 18px; font: inherit; font-size: 15px; cursor: pointer; transition: all .15s; }
+  .btn.primary { background: var(--brand); color: #fff; flex: 1; font-weight: 600; }
+  .btn.primary:hover { background: var(--brand-2); }
+  .btn.ghost { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .btn.text { background: transparent; color: var(--sub); padding: 12px 10px; }
+  .btn:disabled { opacity: .35; cursor: default; }
+  .kbd-tip { text-align: center; font-size: 12px; color: var(--sub); margin-top: 10px; }
+
+  .welcome h1 { font-size: 24px; margin: 0 0 8px; }
+  .welcome p { color: var(--sub); margin: 0 0 14px; }
+  .feature { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; font-size: 15px; }
+  .feature b { color: var(--brand); }
+  .notice { font-size: 13px; color: var(--warn); background: var(--warn-soft); border-radius: 10px; padding: 8px 12px; margin-top: 12px; }
+
+  .summary h2 { font-size: 21px; margin: 0 0 4px; }
+  .summary .sum-sub { color: var(--sub); font-size: 14px; margin-bottom: 14px; }
+  .sum-list { max-height: 46vh; overflow: auto; border: 1px solid var(--line); border-radius: 14px; }
+  .sum-item { padding: 10px 14px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .sum-item:last-child { border-bottom: none; }
+  .sum-item:hover { background: var(--brand-soft); }
+  .sum-item .q { font-size: 13px; color: var(--sub); }
+  .sum-item .a { font-size: 14px; white-space: pre-wrap; word-break: break-word; }
+  .sum-item .a.empty { color: var(--warn); }
+  .sum-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .sum-actions .btn { flex: 1; min-width: 120px; }
+  .done-box { text-align: center; padding: 18px 0 6px; }
+  .done-box .big { font-size: 42px; }
+
+  .toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: rgba(17,17,17,.92); color: #fff; padding: 9px 16px;
+    border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90vw; text-align: center; z-index: 10; }
+  .toast.show { opacity: 1; }
+  @media (max-width: 520px) { .card { padding: 22px 18px 18px; border-radius: 18px; } .label { font-size: 19px; } .kbd-tip { display: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="title" id="title"></div>
+    <div class="meta" id="meta"></div>
+    <div class="progress-row">
+      <div class="progress"><i id="pbar"></i></div>
+      <div class="step-text" id="stepText"></div>
+    </div>
+  </div>
+  <div class="stage" id="stage"></div>
+  <div class="nav" id="nav">
+    <button class="btn ghost" id="prevBtn">上一题</button>
+    <button class="btn text" id="skipBtn">跳过</button>
+    <button class="btn primary" id="nextBtn">下一题</button>
+  </div>
+  <div class="kbd-tip" id="kbdTip">快捷键：数字键选择 · Enter 下一题 · ← 上一题 · 多行输入框里用 ⌘/Ctrl + Enter</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script id="form-data" type="application/json">__FORM_DATA__</script>
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById('form-data').textContent);
+  const storeKey = 'boss-job-plan:' + (data.id || data.title);
+  const questions = [];
+  (data.sections || []).forEach((sec) => (sec.questions || []).forEach((q) => questions.push(Object.assign({ _section: sec.title || '' }, q))));
+  const N = questions.length;
+  const served = location.protocol === 'http:' || location.protocol === 'https:';
+
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(storeKey) || '{}'); } catch (e) { saved = {}; }
+  const answers = saved.answers || {};
+  let pos = typeof saved.pos === 'number' ? saved.pos : -1;
+  if (pos > N) pos = N;
+
+  const $ = (s) => document.querySelector(s);
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const ans = (id) => answers[id] || (answers[id] = { sel: [], other: '', text: '', detail: '' });
+  const persist = () => { try { localStorage.setItem(storeKey, JSON.stringify({ answers, pos })); } catch (e) {} };
+
+  document.title = '求职问卷 · ' + data.title;
+  $('#title').textContent = data.title;
+  if (data.subtitle) $('#meta').append(data.subtitle + '  ');
+  if (data.jd_url) { const a = el('a', null, '查看岗位原文 ↗'); a.href = data.jd_url; a.target = '_blank'; $('#meta').append(a); }
+
+  function toast(msg, ms) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms || 2200); }
+
+  // ---------- 语音输入 ----------
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4"/></svg>';
+  let rec = null, recBtn = null, recInterim = null;
+
+  function stopVoice() {
+    if (rec) { rec.onend = null; rec.onresult = null; rec.onerror = null; try { rec.stop(); } catch (e) {} rec = null; }
+    if (recBtn) { recBtn.classList.remove('rec'); recBtn.querySelector('span').textContent = recBtn.dataset.label; recBtn = null; }
+    if (recInterim) { recInterim.textContent = ''; recInterim = null; }
+  }
+
+  function voiceRow(label, onFinal) {
+    const row = el('div', 'voice-row');
+    const b = el('button', 'mic'); b.type = 'button'; b.dataset.label = label;
+    b.innerHTML = micSvg + '<span></span>'; b.querySelector('span').textContent = label;
+    const interim = el('div', 'interim');
+    b.onclick = () => {
+      if (recBtn === b) { stopVoice(); return; }
+      stopVoice();
+      if (!SR) { toast('这个浏览器不支持网页语音识别，请用 Chrome 或 Edge 打开；Mac 也可以按两下 Fn 键使用系统听写', 4200); return; }
+      rec = new SR(); rec.lang = 'zh-CN'; rec.continuous = true; rec.interimResults = true;
+      rec.onresult = (e) => {
+        let tmp = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const r = e.results[i];
+          if (r.isFinal) { const t = r[0].transcript.trim(); if (t) onFinal(t); } else tmp += r[0].transcript;
+        }
+        interim.textContent = tmp ? '正在听：' + tmp : '正在听…再点一次结束';
+      };
+      rec.onerror = (e) => {
+        const m = {
+          'not-allowed': '麦克风权限被拒绝：点击地址栏左侧图标允许麦克风后再试',
+          'service-not-allowed': '浏览器不允许语音服务，可按两下 Fn 键使用系统听写',
+          'network': '语音识别需要联网（Chrome 使用在线识别），也可按两下 Fn 键使用系统听写',
+          'no-speech': '没有听到声音，再试一次',
+          'audio-capture': '没有找到麦克风'
+        };
+        if (e.error !== 'aborted') toast(m[e.error] || ('语音识别出错：' + e.error), 4000);
+        stopVoice();
+      };
+      rec.onend = () => stopVoice();
+      try {
+        rec.start(); recBtn = b; recInterim = interim;
+        b.classList.add('rec'); b.querySelector('span').textContent = '正在听，点击结束';
+        interim.textContent = '正在听…';
+      } catch (err) { toast('无法启动语音识别'); rec = null; }
+    };
+    row.append(b, interim);
+    return row;
+  }
+
+  const norm = (s) => String(s).toLowerCase().replace(/[\s，。,.、\/／（）()·:：;；"“”'‘’!！?？\-–—~～]/g, '');
+  const CN_NUM = { '一': 1, '二': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9 };
+
+  // 把语音内容匹配到选项；匹配不上的部分放进补充框或“其他”
+  function applyVoiceToChoice(q, transcript) {
+    const a = ans(q.id);
+    const opts = (q.options || []).slice();
+    if (q.allow_other && !opts.includes('其他')) opts.push('其他');
+    let rest = norm(transcript);
+    const hit = [];
+    opts.forEach((o) => {
+      const keys = [norm(o)];
+      o.split(/[\/／（(，,]/).forEach((p) => { const k = norm(p); if (k.length >= 2) keys.push(k); });
+      keys.sort((x, y) => y.length - x.length);
+      for (const k of keys) { if (k && rest.includes(k)) { hit.push(o); rest = rest.split(k).join(''); break; } }
+    });
+    const numRe = /(?:第|选)?([1-9一二两三四五六七八九])(?:个|项|号)/g;
+    let m;
+    while ((m = numRe.exec(transcript))) {
+      const n = CN_NUM[m[1]] || parseInt(m[1], 10);
+      if (opts[n - 1] && !hit.includes(opts[n - 1])) hit.push(opts[n - 1]);
+    }
+    if (hit.length) {
+      if (q.type === 'single') a.sel = [hit[0]];
+      else hit.forEach((o) => { if (!a.sel.includes(o)) a.sel.push(o); });
+    }
+    // 没对上任何选项：整句记下；对上了但还有较多其他内容（如“用 Cursor，主要写网页”）：整句放进补充说明保留上下文
+    const leftover = !hit.length ? transcript : (rest.length >= 4 && q.detail ? transcript : '');
+    if (leftover) {
+      if (q.detail) a.detail = (a.detail ? a.detail + '；' : '') + leftover;
+      else if (q.allow_other) { if (!a.sel.includes('其他')) a.sel.push('其他'); a.other = (a.other ? a.other + '；' : '') + leftover; }
+    }
+    persist();
+    render(0);
+    if (hit.length) toast('已选择：' + hit.join('、'));
+    else if (leftover && (q.detail || q.allow_other)) toast('没有对上选项，已记录到补充说明');
+    else toast('没有对上选项，可以直接点选');
+  }
+
+  // ---------- 渲染 ----------
+  function answered(q) {
+    const a = ans(q.id);
+    if (q.type === 'single' || q.type === 'multi') return a.sel.length > 0;
+    return a.text.trim().length > 0;
+  }
+
+  function textInput(value, multiline, placeholder, rows, onInput) {
+    const input = multiline ? el('textarea') : el('input');
+    if (!multiline) input.type = 'text'; else input.rows = rows || 3;
+    input.placeholder = placeholder || '';
+    input.value = value || '';
+    input.oninput = () => onInput(input.value);
+    return input;
+  }
+
+  function appendText(input, t, multiline) {
+    const v = input.value.trim();
+    input.value = v ? v + (multiline ? '\n' : '，') + t : t;
+    input.dispatchEvent(new Event('input'));
+  }
+
+  function welcomeCard() {
+    const c = el('div', 'card welcome');
+    c.append(el('h1', null, '用几分钟，补全你的求职信息'));
+    c.append(el('p', null, data.intro || '一屏一题，大部分点一下就行。回答越真实，生成的简历和面试准备就越贴合你。'));
+    [['👆', '<b>点选为主</b>：单选题点完自动进入下一题，也可以用数字键选择'],
+     ['🎙️', '<b>可以直接说</b>：点麦克风说出答案，选择题会自动匹配选项，其他内容记进补充说明'],
+     ['💾', '<b>自动保存</b>：中途关掉页面也不会丢，最后统一检查再提交']].forEach(([i, t]) => {
+      const f = el('div', 'feature'); f.append(el('span', null, i)); const s = el('span'); s.innerHTML = t; f.append(s); c.append(f);
+    });
+    if (!SR) c.append(el('div', 'notice', '当前浏览器不支持网页语音识别，建议用 Chrome 或 Edge 打开；Mac 也可以按两下 Fn 键使用系统听写。'));
+    else if (!served) c.append(el('div', 'notice', '页面是以本地文件方式打开的，麦克风可能用不了；如果遇到问题，请让 Agent 用本地服务方式（--serve）重新打开问卷。'));
+    const n = questions.filter(answered).length;
+    if (n) c.append(el('div', 'notice', '已恢复上次填写的 ' + n + ' 题，可以继续。'));
+    return c;
+  }
+
+  function questionCard(i) {
+    const q = questions[i], a = ans(q.id);
+    const c = el('div', 'card');
+    if (q._section) c.append(el('div', 'section-tag', q._section));
+    c.append(el('div', 'qno', '第 ' + (i + 1) + ' 题 / 共 ' + N + ' 题'));
+    const label = el('div', 'label', q.label);
+    if (q.optional) label.append(el('span', 'opt', '选填'));
+    c.append(label);
+    if (q.hint) c.append(el('div', 'hint', q.hint));
+    if (q.why) c.append(el('div', 'why', '为什么问：' + q.why));
+
+    if (q.type === 'single' || q.type === 'multi') {
+      if (q.type === 'multi') c.append(el('div', 'multi-tip', '可多选'));
+      const chips = el('div', 'chips');
+      const opts = (q.options || []).slice();
+      if (q.allow_other && !opts.includes('其他')) opts.push('其他');
+      let otherField = null;
+      opts.forEach((o, k) => {
+        const b = el('button', 'chip' + (a.sel.includes(o) ? ' on' : ''));
+        b.type = 'button'; b.dataset.opt = o;
+        b.append(el('span', 'key', k < 9 ? String(k + 1) : '·'), el('span', null, o), el('span', 'mark', '✓'));
+        b.onclick = () => toggleOption(q, o);
+        chips.append(b);
+      });
+      c.append(chips);
+      if (q.allow_other) {
+        otherField = el('div', 'field');
+        const inp = textInput(a.other, false, '请写明“其他”的内容', 1, (v) => { a.other = v; persist(); });
+        otherField.append(inp);
+        otherField.style.display = a.sel.includes('其他') ? '' : 'none';
+        c.append(otherField);
+      }
+      c.append(voiceRow('说出你的选择', (t) => applyVoiceToChoice(q, t)));
+      if (q.detail) {
+        c.append(el('div', 'sub-label', typeof q.detail === 'string' ? q.detail : '补充说明（选填）'));
+        const f = el('div', 'field');
+        const d = textInput(a.detail, true, '可以打字，也可以点下方麦克风说', 2, (v) => { a.detail = v; persist(); });
+        f.append(d);
+        c.append(f);
+        c.append(voiceRow('语音补充', (t) => appendText(d, t, true)));
+      }
+    } else {
+      const multiline = q.type === 'textarea';
+      const f = el('div', 'field');
+      const input = textInput(a.text, multiline, q.placeholder || (multiline ? '可以打字，也可以点麦克风直接说' : ''), q.rows, (v) => { a.text = v; persist(); updateProgress(); });
+      f.append(input);
+      c.append(f);
+      if (q.quick && q.quick.length) {
+        const qk = el('div', 'quick');
+        q.quick.forEach((t) => { const p = el('button', 'pill', t); p.type = 'button'; p.onclick = () => { input.value = t; input.dispatchEvent(new Event('input')); setTimeout(() => go(1), 250); }; qk.append(p); });
+        c.append(qk);
+      }
+      c.append(voiceRow('语音输入', (t) => appendText(input, t, multiline)));
+      setTimeout(() => { if (window.innerWidth > 520) input.focus(); }, 340);
+    }
+    return c;
+  }
+
+  function toggleOption(q, o) {
+    const a = ans(q.id);
+    if (q.type === 'single') a.sel = a.sel.includes(o) ? [] : [o];
+    else {
+      if (a.sel.includes(o)) a.sel = a.sel.filter((x) => x !== o);
+      else {
+        const none = /^(都没|都没有|没有|无|完全不)/;
+        if (none.test(o)) a.sel = [o]; else a.sel = a.sel.filter((x) => !none.test(x)).concat(o);
+      }
+    }
+    persist();
+    document.querySelectorAll('.chip').forEach((b) => b.classList.toggle('on', a.sel.includes(b.dataset.opt)));
+    const of = document.querySelector('.card .field input[type=text]');
+    if (q.allow_other && of) of.parentElement.style.display = a.sel.includes('其他') ? '' : 'none';
+    if (q.allow_other && o === '其他' && a.sel.includes('其他') && of) of.focus();
+    updateProgress();
+    if (q.type === 'single' && a.sel.length && !q.detail && o !== '其他') setTimeout(() => go(1), 280);
+  }
+
+  function answerText(q) {
+    const a = ans(q.id);
+    if (q.type === 'single' || q.type === 'multi') {
+      const parts = a.sel.map((o) => (o === '其他' ? '其他：' + (a.other.trim() || '（未填写）') : o));
+      let out = parts.length ? parts.join('；') : '';
+      if (a.detail && a.detail.trim()) out += (out ? '\n' : '') + '补充：' + a.detail.trim();
+      return out;
+    }
+    return a.text.trim();
+  }
+
+  function buildText() {
+    const now = new Date(), pad = (x) => String(x).padStart(2, '0');
+    const ts = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+    const lines = ['【求职问卷回答｜boss-job-plan】', '岗位：' + data.title + (data.jd_url ? '（' + data.jd_url + '）' : ''), '填写时间：' + ts, ''];
+    let lastSec = null;
+    questions.forEach((q, i) => {
+      if (q._section && q._section !== lastSec) { lines.push('## ' + q._section); lastSec = q._section; }
+      const t = answerText(q);
+      lines.push((i + 1) + '. ' + q.label, '   → ' + (t ? t.replace(/\n/g, '\n   ') : '（未回答）'), '');
+    });
+    lines.push('请根据以上回答，继续用 boss-job-plan 更新这个岗位的求职方案（证据匹配表、简历草稿、日程等）。');
+    return lines.join('\n');
+  }
+
+  function summaryCard() {
+    const c = el('div', 'card summary');
+    const missing = questions.filter((q) => !answered(q) && !q.optional).length;
+    c.append(el('h2', null, missing ? '检查一下，还有 ' + missing + ' 题没答' : '全部完成！最后检查一下'));
+    c.append(el('div', 'sum-sub', '点任意一条可以回去修改。没把握的题留空也没关系，Agent 会标记为“待确认”，不会替你编。'));
+    const list = el('div', 'sum-list');
+    questions.forEach((q, i) => {
+      const it = el('div', 'sum-item');
+      it.append(el('div', 'q', (i + 1) + '. ' + q.label));
+      const t = answerText(q);
+      it.append(el('div', 'a' + (t ? '' : ' empty'), t || (q.optional ? '（选填，未填写）' : '（未回答，点击补充）')));
+      it.onclick = () => { pos = i; persist(); render(-1); };
+      list.append(it);
+    });
+    c.append(list);
+    const acts = el('div', 'sum-actions');
+    if (served) { const s = el('button', 'btn primary', '提交给 Agent'); s.onclick = submit; acts.append(s); }
+    const cp = el('button', 'btn ' + (served ? 'ghost' : 'primary'), '复制答案'); cp.onclick = copy;
+    const dl = el('button', 'btn ghost', '下载文件'); dl.onclick = download;
+    acts.append(cp, dl);
+    c.append(acts);
+    return c;
+  }
+
+  function doneCard() {
+    const c = el('div', 'card');
+    const box = el('div', 'done-box');
+    box.append(el('div', 'big', '✅'));
+    box.append(el('h2', null, '已提交给 Agent'));
+    box.append(el('p', null, '回到对话里，说一句“填好了”就行。'));
+    const back = el('button', 'btn ghost', '回去修改'); back.onclick = () => { pos = N; render(-1); };
+    box.append(back);
+    c.append(box);
+    return c;
+  }
+
+  function updateProgress() {
+    const done = questions.filter(answered).length;
+    $('#pbar').style.width = (N ? (pos >= N ? 100 : Math.max(0, pos) / N * 100) : 0) + '%';
+    $('#stepText').textContent = pos < 0 ? '共 ' + N + ' 题' : pos >= N ? '已答 ' + done + ' / ' + N : (pos + 1) + ' / ' + N;
+  }
+
+  let submitted = false;
+  function render(dir) {
+    stopVoice();
+    const stage = $('#stage');
+    stage.innerHTML = '';
+    let card;
+    if (submitted) card = doneCard();
+    else if (pos < 0) card = welcomeCard();
+    else if (pos >= N) card = summaryCard();
+    else card = questionCard(pos);
+    if (dir > 0) card.classList.add('in-right'); else if (dir < 0) card.classList.add('in-left');
+    stage.append(card);
+    const nav = $('#nav');
+    nav.style.display = submitted ? 'none' : '';
+    $('#prevBtn').disabled = pos < 0;
+    $('#skipBtn').style.display = pos >= 0 && pos < N ? '' : 'none';
+    $('#nextBtn').style.display = pos >= N ? 'none' : '';
+    $('#nextBtn').textContent = pos < 0 ? '开始' : pos === N - 1 ? '完成，去检查' : '下一题';
+    $('#kbdTip').style.display = pos >= 0 && pos < N ? '' : 'none';
+    updateProgress();
+  }
+
+  function go(step) {
+    const np = Math.min(N, Math.max(-1, pos + step));
+    if (np === pos) return;
+    pos = np; persist(); render(step);
+  }
+
+  async function submit() {
+    try {
+      const r = await fetch('submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: buildText() }) });
+      if (!r.ok) throw new Error(r.status);
+      submitted = true; render(1);
+    } catch (e) { toast('提交失败（本地服务可能已关闭），请改用“复制答案”或“下载文件”', 4000); }
+  }
+
+  async function copy() {
+    const text = buildText();
+    try { await navigator.clipboard.writeText(text); toast('已复制，粘贴给 Agent 即可'); return; } catch (e) {}
+    const ta = el('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.append(ta); ta.select();
+    try { document.execCommand('copy'); toast('已复制，粘贴给 Agent 即可'); } catch (e) { toast('复制失败，请使用“下载文件”'); }
+    ta.remove();
+  }
+
+  function download() {
+    const blob = new Blob([buildText()], { type: 'text/markdown;charset=utf-8' });
+    const a = el('a'); a.href = URL.createObjectURL(blob);
+    a.download = (data.file_name || ('求职问卷回答_' + (data.id || 'job'))) + '.md';
+    document.body.append(a); a.click(); a.remove();
+    toast('已下载，回到对话里说“填好了”即可');
+  }
+
+  $('#prevBtn').onclick = () => go(-1);
+  $('#nextBtn').onclick = () => go(1);
+  $('#skipBtn').onclick = () => go(1);
+
+  document.addEventListener('keydown', (e) => {
+    if (submitted) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'textarea') { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); go(1); } return; }
+    if (tag === 'input') { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); go(1); } return; }
+    if (e.key === 'Enter' || e.key === 'ArrowRight') { if (pos < N) { e.preventDefault(); go(1); } }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    else if (/^[1-9]$/.test(e.key) && pos >= 0 && pos < N) {
+      const q = questions[pos];
+      if (q.type === 'single' || q.type === 'multi') {
+        const opts = (q.options || []).slice(); if (q.allow_other && !opts.includes('其他')) opts.push('其他');
+        const o = opts[parseInt(e.key, 10) - 1]; if (o) toggleOption(q, o);
+      }
+    }
+  });
+
+  render(0);
+})();
+</script>
+</body>
+</html>
